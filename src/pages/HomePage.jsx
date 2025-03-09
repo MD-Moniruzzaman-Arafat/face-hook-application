@@ -1,9 +1,11 @@
 import React from 'react'
+import Header from '../components/common/Header'
 
 export default function HomePage() {
     return (
-        <div>
-            <h1>Home Page</h1>
-        </div>
+        <>
+            <Header />
+            {/* <h1>Home Page</h1> */}
+        </>
     )
 }
