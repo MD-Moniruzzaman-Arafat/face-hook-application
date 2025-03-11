@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form"
 import Field from "../common/Field"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../../hooks/useAuth";
+import axios from "axios";
 
 
 export default function LoginForm() {
@@ -12,15 +13,30 @@ export default function LoginForm() {
         register,
         handleSubmit,
         formState: { errors },
+        setError
     } = useForm()
 
-    const submitForm = (data) => {
-        console.log(data)
-        // make an api call
-        // will return token and logged in user information
-        const user = { ...data }
-        setAuth({ user })
-        navigate("/")
+    const submitForm = async (data) => {
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_SERVER_BASE_URL}/auth/login`, data)
+            if (response.status === 200) {
+                const { user, token } = response.data;
+                if (token) {
+                    const authToken = token?.token;
+                    const refreshToken = token.refreshToken;
+                    console.log(`login time auth token ${authToken}`)
+                    setAuth({ user, authToken, refreshToken })
+                    navigate("/")
+                }
+            }
+
+        } catch (error) {
+            setError('error', {
+                type: 'random',
+                message: `user with email ${data.email} is not found`
+            })
+        }
+
     }
 
     return (
@@ -46,6 +62,7 @@ export default function LoginForm() {
                         id="password"
                     />
                 </Field>
+                <p className="text-xs p-1 text-red-600">{errors?.error?.message}</p>
                 {/* <!-- Submit --> */}
                 <Field>
                     <button
